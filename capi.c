@@ -317,7 +317,7 @@ static int capiS_tounsigned (lua_State *L) {
 
 
 /*{=================================================================
-** type
+** types
 **==================================================================*/
 
 
@@ -438,7 +438,7 @@ static const luaL_Reg capi_strict_lib[] = {
 };
 
 
-static const luaL_Reg capi_type_lib[] = {
+static const luaL_Reg capi_types_lib[] = {
   {"name", capiT_name},
   {"tag", capiT_tag},
   {"iter", capiT_iter},
@@ -518,7 +518,7 @@ static void require_capi_sublib_ (lua_State *L, const char *name,
   }
 
 SUBLIB_OPEN(strict)
-SUBLIB_OPEN(type)
+SUBLIB_OPEN(types)
 SUBLIB_OPEN(alias)
 
 
@@ -527,7 +527,7 @@ int luaopen_capi_all (lua_State *L) {
   require_capi_base(L);
   savetop = lua_gettop(L);
   require_capi_sublib(L, strict);
-  require_capi_sublib(L, type);
+  require_capi_sublib(L, types);
   require_capi_sublib(L, alias);
   lua_settop(L, savetop);
   return 1;
