@@ -42,7 +42,8 @@ static int capi_topointer (lua_State *L) {
 
 
 static int capi_tolightuserdata (lua_State *L) {
-  const void *ptr;
+  void *ptr;
+  luaL_checkany(L, 1);
   if (lua_islightuserdata(L, 1)) {
     lua_settop(L, 1);
     return 1;
@@ -60,73 +61,86 @@ static int capi_tolightuserdata (lua_State *L) {
 
 
 static int capi_rawlen (lua_State *L) {
-  size_t l = lua_rawlen(L, 1);
+  size_t l;
+  luaL_checkany(L, 1);
+  l = lua_rawlen(L, 1);
   push_size(L, l);
   return 1;
 }
 
 
 static int capi_isfunction (lua_State *L) {
+  luaL_checkany(L, 1);
   lua_pushboolean(L, lua_isfunction(L, 1));
   return 1;
 }
 
 
 static int capi_iscfunction (lua_State *L) {
+  luaL_checkany(L, 1);
   lua_pushboolean(L, lua_iscfunction(L, 1));
   return 1;
 }
 
 
 static int capi_isluafunction (lua_State *L) {
+  luaL_checkany(L, 1);
   lua_pushboolean(L, lua_isfunction(L, 1) && !lua_iscfunction(L, 1));
   return 1;
 }
 
 
 static int capi_islightuserdata (lua_State *L) {
+  luaL_checkany(L, 1);
   lua_pushboolean(L, lua_islightuserdata(L, 1));
   return 1;
 }
 
 
 static int capi_isheavyuserdata (lua_State *L) {
+  luaL_checkany(L, 1);
   lua_pushboolean(L, lua_isuserdata(L, 1) && !lua_islightuserdata(L, 1));
   return 1;
 }
 
 
 static int capi_isuserdata (lua_State *L) {
+  luaL_checkany(L, 1);
   lua_pushboolean(L, lua_isuserdata(L, 1));
   return 1;
 }
 
 
 static int capi_isthread (lua_State *L) {
+  luaL_checkany(L, 1);
   lua_pushboolean(L, lua_isthread(L, 1));
   return 1;
 }
 
 
 static int capi_istable (lua_State *L) {
+  luaL_checkany(L, 1);
   lua_pushboolean(L, lua_istable(L, 1));
   return 1;
 }
 
 
 static int capi_isnil (lua_State *L) {
+  luaL_checkany(L, 1);
   lua_pushboolean(L, lua_isnil(L, 1));
   return 1;
 }
 
 
 static int capi_isnumber (lua_State *L) {
+  luaL_checkany(L, 1);
   lua_pushboolean(L, lua_isnumber(L, 1));
   return 1;
 }
 
 
 static int capi_isstring (lua_State *L) {
+  luaL_checkany(L, 1);
   lua_pushboolean(L, lua_isstring(L, 1));
   return 1;
 }
@@ -135,6 +149,7 @@ static int capi_isstring (lua_State *L) {
 static int capi_tointeger (lua_State *L) {
   lua_Integer n;
   int isnum;
+  luaL_checkany(L, 1);
   n = lua_tointegerx(L, 1, &isnum);
   if (isnum)
     lua_pushinteger(L, n);
@@ -147,6 +162,7 @@ static int capi_tointeger (lua_State *L) {
 static int capi_tounsigned (lua_State *L) {
   lua_Unsigned n;
   int isnum;
+  luaL_checkany(L, 1);
   n = lua_tounsignedx(L, 1, &isnum);
   if (isnum)
     lua_pushunsigned(L, n);
@@ -158,7 +174,9 @@ static int capi_tounsigned (lua_State *L) {
 
 static int capi_tolstring (lua_State *L) {
   size_t l;
-  const char *s = lua_tolstring(L, 1, &l);
+  const char *s;
+  luaL_checkany(L, 1);
+  s = lua_tolstring(L, 1, &l);
   if (s != NULL) {
     lua_pushlstring(L, s, l);
     push_size(L, l);
@@ -172,6 +190,7 @@ static int capi_tolstring (lua_State *L) {
 
 
 static int capi_isboolean (lua_State *L) {
+  luaL_checkany(L, 1);
   lua_pushboolean(L, lua_isboolean(L, 1));
   return 1;
 }
