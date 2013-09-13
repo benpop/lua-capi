@@ -27,18 +27,16 @@
 
 
 static int capi_topointer (lua_State *L) {
-  const void *ptr = lua_topointer(L, 1);
+  void *ptr;
+  luaL_checkany(L, 1);
+  if (lua_type(L, 1) == LUA_TSTRING)
+    ptr = (void *)lua_tostring(L, 1);
+  else
+    ptr = (void *)lua_topointer(L, 1);
   if (ptr != NULL)
     lua_pushfstring(L, "%p", ptr);
   else
     lua_pushnil(L);
-  return 1;
-}
-
-
-static int capi_stringtopointer (lua_State *L) {
-  const char *str = luaL_checkstring(L, 1);
-  lua_pushfstring(L, "%p", str);
   return 1;
 }
 
@@ -49,18 +47,14 @@ static int capi_tolightuserdata (lua_State *L) {
     lua_settop(L, 1);
     return 1;
   }
-  ptr = lua_topointer(L, 1);
+  if (lua_type(L, 1) == LUA_TSTRING)
+    ptr = (void *)lua_tostring(L, 1);
+  else
+    ptr = (void *)lua_topointer(L, 1);
   if (ptr != NULL)
-    lua_pushlightuserdata(L, (void *)ptr);
+    lua_pushlightuserdata(L, ptr);
   else
     lua_pushnil(L);
-  return 1;
-}
-
-
-static int capi_stringtolightuserdata (lua_State *L) {
-  const char *str = luaL_checkstring(L, 1);
-  lua_pushlightuserdata(L, (void *)str);
   return 1;
 }
 
@@ -398,9 +392,7 @@ static void add_newproxy (lua_State *L) {
 
 static const luaL_Reg capi_lib[] = {
   {"topointer", capi_topointer},
-  {"stringtopointer", capi_stringtopointer},
   {"tolightuserdata", capi_tolightuserdata},
-  {"stringtolightuserdata", capi_stringtolightuserdata},
   {"rawlen", capi_rawlen},
   {"type", capi_type},
   {"typename", capi_typename},
@@ -447,8 +439,6 @@ static const luaL_Reg capi_types_lib[] = {
 
 
 static const luaL_Reg capi_alias_lib[] = {
-  {"str2ptr", capi_stringtopointer},
-  {"str2lud", capi_stringtolightuserdata},
   {"tolud", capi_tolightuserdata},
   {"islud", capi_islightuserdata},
   {"ishud", capi_isheavyuserdata},
