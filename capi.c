@@ -97,7 +97,7 @@ static int capi_islightuserdata (lua_State *L) {
 }
 
 
-static int capi_isheavyuserdata (lua_State *L) {
+static int capi_isfulludata (lua_State *L) {
   luaL_checkany(L, 1);
   lua_pushboolean(L, lua_isuserdata(L, 1) && !lua_islightuserdata(L, 1));
   return 1;
@@ -445,7 +445,7 @@ static const luaL_Reg capi_lib[] = {
   {"iscfunction", capi_iscfunction},
   {"isluafunction", capi_isluafunction},
   {"islightuserdata", capi_islightuserdata},
-  {"isheavyuserdata", capi_isheavyuserdata},
+  {"isfulludata", capi_isfulludata},
   {"isuserdata", capi_isuserdata},
   {"isthread", capi_isthread},
   {"istable", capi_istable},
@@ -481,7 +481,7 @@ static const luaL_Reg capi_types_lib[] = {
 static const luaL_Reg capi_alias_lib[] = {
   {"tolud", capi_tolightuserdata},
   {"islud", capi_islightuserdata},
-  {"ishud", capi_isheavyuserdata},
+  {"isfud", capi_isfulludata},
   {"isud", capi_isuserdata},
   {NULL, NULL}
 };
