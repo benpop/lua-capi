@@ -495,9 +495,9 @@ static void require_capi_sublib_ (lua_State *L, const char *name,
                                   lua_CFunction openf) {
   require_capi_base(L);
   if (!get_sublib(L, name)) {
-    char dottedname[64];
-    sprintf(dottedname, "%s.%s", LIBNAME, name);
+    const char *dottedname = lua_pushfstring(L, "%s.%s", LIBNAME, name);
     luaL_requiref(L, dottedname, openf, 0);
+    lua_remove(L, -2);  /* remove formatted string */
   }
 }
 
