@@ -66,19 +66,6 @@ static int capi_rawlen (lua_State *L) {
 }
 
 
-static int capi_type (lua_State *L) {
-  lua_pushinteger(L, lua_type(L, 1));
-  return 1;
-}
-
-
-static int capi_typename (lua_State *L) {
-  int tt = luaL_checkint(L, 1);
-  lua_pushstring(L, lua_typename(L, tt));
-  return 1;
-}
-
-
 static int capi_isfunction (lua_State *L) {
   lua_pushboolean(L, lua_isfunction(L, 1));
   return 1;
@@ -366,6 +353,24 @@ static int capiT_iter (lua_State *L) {
   lua_pushnil(L);  /* no object needed */
   lua_pushinteger(L, -2);  /* initial index */
   return 3;
+}
+
+
+static int capi_type (lua_State *L) {
+  lua_pushinteger(L, lua_type(L, 1));
+  return 1;
+}
+
+
+static int capi_typename (lua_State *L) {
+  int tt = luaL_checkint(L, 1);
+  if (MIN_TYPETAG <= tt && tt <= MAX_TYPETAG) {
+    lua_pushstring(L, lua_typename(L, tt));
+    return 1;
+  }
+  else
+    return luaL_argerror(L, 1,
+        lua_pushfstring(L, "invalid type tag '%d'", tt));
 }
 
 
