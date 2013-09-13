@@ -505,7 +505,7 @@ static void require_capi_sublib_ (lua_State *L, const char *name,
   require_capi_sublib_(L, #name, luaopen_capi_##name)
 
 
-#define sublib_open(name)                                       \
+#define SUBLIB_OPEN(name)                                       \
   int luaopen_capi_##name (lua_State *L) {                      \
     require_capi_base(L);                                       \
     luaL_newlib(L, capi_##name##_lib);                          \
@@ -514,9 +514,9 @@ static void require_capi_sublib_ (lua_State *L, const char *name,
     return 1;  /* return sublib */                              \
   }
 
-sublib_open(strict)
-sublib_open(type)
-sublib_open(alias)
+SUBLIB_OPEN(strict)
+SUBLIB_OPEN(type)
+SUBLIB_OPEN(alias)
 
 
 int luaopen_capi_all (lua_State *L) {
