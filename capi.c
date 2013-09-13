@@ -323,21 +323,24 @@ static int capiS_tounsigned (lua_State *L) {
 
 /* copied from lua-5.2.2/src/ltm.c:22:1 */
 /*
-  - changed type 2 (index 3) for LUA_TLIGHTUSERDATA
+  - change type 2 (index 3) for LUA_TLIGHTUSERDATA
     from "userdata" to "light userdata"
-  - NULL-terminated the list for luaL_checkoption
+  - change type 7 (index 8) for LUA_TUSERDATA
+    from "userdata" to "full userdata"
+  - remove non-usual Lua types ("proto" and "upval")
+  - NULL-terminate the list for luaL_checkoption
 */
 static const char *const Ttypenames[] = {
   "no value",
   "nil", "boolean", "light userdata", "number",
-  "string", "table", "function", "userdata", "thread",
-  "proto", "upval", NULL
+  "string", "table", "function", "full userdata", "thread",
+  NULL
 };
 
 
 /* XXX: make sure these stay consistent with the above */
 #define MIN_TYPETAG (-1)
-#define MAX_TYPETAG (10)
+#define MAX_TYPETAG (8)
 
 
 static int capiT_name (lua_State *L) {
