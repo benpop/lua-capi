@@ -139,6 +139,21 @@ static int capi_isnumber (lua_State *L) {
 }
 
 
+static int capi_isinteger (lua_State *L) {
+#if LUA_VERSION_NUM >= 503
+  luaL_checkany(L, 1);
+  lua_pushboolean(L, lua_isinteger(L, 1));
+#else
+  lua_Number n;
+  int isnum;
+  luaL_checkany(L, 1);
+  n = lua_tonumberx(L, 1, &isnum);
+  lua_pushboolean(L, isnum && n == (lua_Integer)n);
+#endif
+  return 1;
+}
+
+
 static int capi_isstring (lua_State *L) {
   luaL_checkany(L, 1);
   lua_pushboolean(L, lua_isstring(L, 1));
@@ -423,6 +438,7 @@ static const luaL_Reg capi_lib[] = {
   {"isnumber", capi_isnumber},
   {"tointeger", capi_tointeger},
   {"tounsigned", capi_tounsigned},
+  {"isinteger", capi_isinteger},
   {"isstring", capi_isstring},
   {"tolstring", capi_tolstring},
   {"isfunction", capi_isfunction},
