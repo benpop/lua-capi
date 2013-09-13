@@ -41,7 +41,7 @@ static int capi_topointer (lua_State *L) {
 }
 
 
-static int capi_tolightuserdata (lua_State *L) {
+static int capi_tolightudata (lua_State *L) {
   void *ptr;
   luaL_checkany(L, 1);
   if (lua_islightuserdata(L, 1)) {
@@ -90,7 +90,7 @@ static int capi_isluafunction (lua_State *L) {
 }
 
 
-static int capi_islightuserdata (lua_State *L) {
+static int capi_islightudata (lua_State *L) {
   luaL_checkany(L, 1);
   lua_pushboolean(L, lua_islightuserdata(L, 1));
   return 1;
@@ -431,7 +431,7 @@ static void add_newproxy (lua_State *L) {
 
 static const luaL_Reg capi_lib[] = {
   {"topointer", capi_topointer},
-  {"tolightuserdata", capi_tolightuserdata},
+  {"tolightudata", capi_tolightudata},
   {"rawlen", capi_rawlen},
   {"type", capi_type},
   {"typename", capi_typename},
@@ -444,7 +444,7 @@ static const luaL_Reg capi_lib[] = {
   {"isfunction", capi_isfunction},
   {"iscfunction", capi_iscfunction},
   {"isluafunction", capi_isluafunction},
-  {"islightuserdata", capi_islightuserdata},
+  {"islightudata", capi_islightudata},
   {"isfulludata", capi_isfulludata},
   {"isuserdata", capi_isuserdata},
   {"isthread", capi_isthread},
@@ -479,8 +479,8 @@ static const luaL_Reg capi_types_lib[] = {
 
 
 static const luaL_Reg capi_alias_lib[] = {
-  {"tolud", capi_tolightuserdata},
-  {"islud", capi_islightuserdata},
+  {"tolud", capi_tolightudata},
+  {"islud", capi_islightudata},
   {"isfud", capi_isfulludata},
   {"isud", capi_isuserdata},
   {NULL, NULL}
