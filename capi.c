@@ -136,7 +136,6 @@ static int capi_istable (lua_State *L) {
 static int capi_isnil (lua_State *L) {
   lua_pushboolean(L, lua_isnil(L, 1));
   return 1;
-
 }
 
 
@@ -463,20 +462,20 @@ int luaopen_capi (lua_State *L) {
 
 
 static void require_capi_base (lua_State *L) {
-  lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
+  /* check in package.loaded */
+  luaL_getsubtable(L, LUA_REGISTRYINDEX, "_LOADED");
+  lua_getfield(L, -1, LIBNAME);
   if (lua_istable(L, -1)) {
-    lua_getfield(L, -1, LIBNAME);
-    if (lua_istable(L, -1)) {
-      lua_remove(L, -2);  /* remove _LOADED */
-      return;
-    }
-    lua_pop(L, 2);
+    lua_remove(L, -2);  /* remove _LOADED */
+    return;
   }
-  else lua_pop(L, 1);
+  lua_pop(L, 2);
+  /* check in globals */
   lua_getglobal(L, LIBNAME);
   if (lua_istable(L, -1))
     return;
   lua_pop(L, 1);
+  /* require from here */
   luaL_requiref(L, LIBNAME, luaopen_capi, 0);
 }
 
