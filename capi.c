@@ -320,6 +320,17 @@ static int capiS_tonumber (lua_State *L) {
 }
 
 
+#if LUA_VERSION_NUM >= 503
+static int capiS_tofloat (lua_State *L) {
+  if (lua_type(L, 1) == LUA_TNUMBER && !lua_isinteger(L, 1))
+    lua_settop(L, 1);
+  else
+    lua_pushnil(L);
+  return 1;
+}
+#endif
+
+
 static int capiS_tointeger (lua_State *L) {
   if (lua_type(L, 1) == LUA_TNUMBER)
     lua_pushinteger(L, lua_tointeger(L, 1));
@@ -472,6 +483,11 @@ static const luaL_Reg capi_strict_lib[] = {
   {"isnumber", capiS_isnumber},
   {"isstring", capiS_isstring},
   {"tonumber", capiS_tonumber},
+#if LUA_VERSION_NUM >= 503
+  {"tofloat", capiS_tofloat},
+#else
+  {"tofloat", capiS_tonumber},
+#endif
   {"tointeger", capiS_tointeger},
   {"tounsigned", capiS_tounsigned},
   {"tostring", capiS_tostring},
