@@ -154,11 +154,11 @@ static int capi_isinteger (lua_State *L) {
   luaL_checkany(L, 1);
   lua_pushboolean(L, lua_isinteger(L, 1));
 #else
-  lua_Number n;
+  lua_Integer i;
   int isnum;
   luaL_checkany(L, 1);
-  n = lua_tonumberx(L, 1, &isnum);
-  lua_pushboolean(L, isnum && n == (lua_Integer)n);
+  i = lua_tointegerx(L, 1, &isnum);
+  lua_pushboolean(L, isnum && i == lua_tonumber(L, 1));
 #endif
   return 1;
 }
