@@ -5,20 +5,30 @@
 #define LIBNAME "capi"
 
 
-/* XXX: assume lua_Integer max == LONG_MAX */
-#ifdef LUA_NUMBER_DOUBLE
-#define push_size(L,n)                      \
-    if ((n) <= (size_t)LONG_MAX)            \
-      lua_pushinteger(L, (lua_Integer)(n)); \
-    else                                    \
-      lua_pushnumber(L, (lua_Number)(n))
+#ifndef MAX_INTEGER /* { */
+
+#if defined(LUA_INTSIZE) && LUA_INTSIZE >= 3
+typedef lua_Unsigned Uint64;
+#elif defined(_MSC_VER) || defined(__BORLANDC__)
+typedef unsigned __int64 Uint64;
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#include <stdint.h>
+typedef uint64_t Uint64;
 #else
-#define push_size(L,n)                      \
-    if ((n) <= (size_t)LONG_MAX)            \
+typedef unsigned long long Uint64;
+#endif
+
+#define MAX_INTEGER ((lua_Integer)(~(Uint64)0 >> 1))
+
+#endif /* } */
+
+
+#define push_size(L,n) do {                 \
+    if ((n) <= MAX_INTEGER)                 \
       lua_pushinteger(L, (lua_Integer)(n)); \
     else                                    \
-      luaL_error(L, "size is too large to represent")
-#endif
+      lua_pushnumber(L, (lua_Number)(n));   \
+  } while (0)
 
 
 /*{=================================================================
