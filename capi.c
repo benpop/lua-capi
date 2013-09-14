@@ -105,7 +105,7 @@ static void luaL_requiref (lua_State *L, const char *modname,
 **==================================================================*/
 
 
-static int capi_topointer (lua_State *L) {
+static int capi_address (lua_State *L) {
   void *ptr;
   luaL_checkany(L, 1);
   if (lua_type(L, 1) == LUA_TSTRING)
@@ -533,7 +533,7 @@ static void add_newproxy (lua_State *L) {
 
 
 static const luaL_Reg capi_lib[] = {
-  {"topointer", capi_topointer},
+  {"address", capi_address},
   {"tolightudata", capi_tolightudata},
   {"rawlen", capi_rawlen},
   {"type", capi_type},

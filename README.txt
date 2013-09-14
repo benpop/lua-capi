@@ -10,7 +10,7 @@ To require:
 	ctypes = require "capi.types"  --  or capi.types
 
 Example usage:
-	capi.topointer(func)  -->  pointer representation as hex string
+	capi.address(func)  -->  pointer representation as hex string
 	capi.tolstring(math.pi)  -->  convert to string with length
 	capi.createtable(5, 3)  -->  table with 5 array slots and 3 hash slots
 	capi.types.name(2)  -->  what type has the number 2?
