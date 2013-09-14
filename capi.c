@@ -31,6 +31,75 @@ typedef unsigned long long Uint64;
   } while (0)
 
 
+#if LUA_VERSION_NUM < 502 /* { */
+
+#define lua_rawlen lua_objlen
+
+static int lua_absindex (lua_State *L, int idx) {
+  return idx >= 0 ? idx : (1 + idx + lua_gettop(L));
+}
+
+static lua_Number lua_tonumberx (lua_State *L, int idx, int *pisnum) {
+  lua_Number n = lua_tonumber(L, idx);
+  if (pisnum) *pisnum = (n != 0 || lua_type(L, idx) == LUA_TNUMBER);
+  return n;
+}
+
+static lua_Integer lua_tointegerx (lua_State *L, int idx, int *pisnum) {
+  lua_Integer n = lua_tointeger(L, idx);
+  if (pisnum) *pisnum = (n != 0 || lua_type(L, idx) == LUA_TNUMBER);
+  return n;
+}
+
+
+/* lua 5.3, work1 src/lauxlib.c:875-912 */
+
+/*
+** ensure that stack[idx][fname] has a table and push that table
+** into the stack
+*/
+static int luaL_getsubtable (lua_State *L, int idx, const char *fname) {
+  lua_getfield(L, idx, fname);
+  if (lua_istable(L, -1)) return 1;  /* table already there */
+  else {
+    lua_pop(L, 1);  /* remove previous result */
+    idx = lua_absindex(L, idx);
+    lua_newtable(L);
+    lua_pushvalue(L, -1);  /* copy to be left at top */
+    lua_setfield(L, idx, fname);  /* assign new table to field */
+    return 0;  /* false, because did not find table there */
+  }
+}
+
+
+/*
+** stripped-down 'require'. Calls 'openf' to open a module,
+** registers the result in 'package.loaded' table and, if 'glb'
+** is true, also registers the result in the global table.
+** Leaves resulting module on the top.
+*/
+static void luaL_requiref (lua_State *L, const char *modname,
+                           lua_CFunction openf, int glb) {
+  lua_pushcfunction(L, openf);
+  lua_pushstring(L, modname);  /* argument to open function */
+  lua_call(L, 1, 1);  /* open module */
+  luaL_getsubtable(L, LUA_REGISTRYINDEX, "_LOADED");
+  lua_pushvalue(L, -2);  /* make copy of module (call result) */
+  lua_setfield(L, -2, modname);  /* _LOADED[modname] = module */
+  lua_pop(L, 1);  /* remove _LOADED table */
+  if (glb) {
+    lua_pushvalue(L, -1);  /* copy of 'mod' */
+    lua_setglobal(L, modname);  /* _G[modname] = module */
+  }
+}
+
+#else /* }{ */
+
+#define luaL_register(L,n,f) luaL_newlib(L,f)
+
+#endif /* } */
+
+
 /*{=================================================================
 ** main library
 **==================================================================*/
@@ -154,11 +223,11 @@ static int capi_isinteger (lua_State *L) {
   luaL_checkany(L, 1);
   lua_pushboolean(L, lua_isinteger(L, 1));
 #else
-  lua_Integer i;
+  lua_Integer n;
   int isnum;
   luaL_checkany(L, 1);
-  i = lua_tointegerx(L, 1, &isnum);
-  lua_pushboolean(L, isnum && i == lua_tonumber(L, 1));
+  n = lua_tonumberx(L, 1, &isnum);
+  lua_pushboolean(L, isnum && n == (lua_Integer)n);
 #endif
   return 1;
 }
@@ -184,6 +253,7 @@ static int capi_tointeger (lua_State *L) {
 }
 
 
+#if LUA_VERSION_NUM >= 502
 static int capi_tounsigned (lua_State *L) {
   lua_Unsigned n;
   int isnum;
@@ -195,6 +265,7 @@ static int capi_tounsigned (lua_State *L) {
     lua_pushnil(L);
   return 1;
 }
+#endif
 
 
 static int capi_tolstring (lua_State *L) {
@@ -345,6 +416,7 @@ static int capiS_tointeger (lua_State *L) {
 }
 
 
+#if LUA_VERSION_NUM >= 502
 static int capiS_tounsigned (lua_State *L) {
 #if LUA_VERSION_NUM >= 503
   if (lua_type(L, 1) == LUA_TNUMBER && lua_isinteger(L, 1))
@@ -356,6 +428,7 @@ static int capiS_tounsigned (lua_State *L) {
     lua_pushnil(L);
   return 1;
 }
+#endif
 
 
 /*}=================================================================*/
@@ -467,7 +540,9 @@ static const luaL_Reg capi_lib[] = {
   {"typename", capi_typename},
   {"isnumber", capi_isnumber},
   {"tointeger", capi_tointeger},
+#if LUA_VERSION_NUM >= 502
   {"tounsigned", capi_tounsigned},
+#endif
   {"isinteger", capi_isinteger},
   {"isstring", capi_isstring},
   {"tolstring", capi_tolstring},
@@ -494,11 +569,11 @@ static const luaL_Reg capi_strict_lib[] = {
   {"tonumber", capiS_tonumber},
 #if LUA_VERSION_NUM >= 503
   {"tofloat", capiS_tofloat},
-#else
-  {"tofloat", capiS_tonumber},
 #endif
   {"tointeger", capiS_tointeger},
+#if LUA_VERSION_NUM >= 502
   {"tounsigned", capiS_tounsigned},
+#endif
   {"tostring", capiS_tostring},
   {"tolstring", capiS_tolstring},
   {NULL, NULL}
@@ -523,7 +598,7 @@ static const luaL_Reg capi_alias_lib[] = {
 
 
 int luaopen_capi (lua_State *L) {
-  luaL_newlib(L, capi_lib);
+  luaL_register(L, LIBNAME, capi_lib);
   add_newproxy(L);
   return 1;
 }
@@ -573,6 +648,7 @@ static void require_capi_sublib_ (lua_State *L, const char *name,
   require_capi_sublib_(L, #name, luaopen_capi_##name)
 
 
+#if LUA_VERSION_NUM >= 502
 #define SUBLIB_OPEN(name)                                       \
   int luaopen_capi_##name (lua_State *L) {                      \
     require_capi_base(L);                                       \
@@ -581,6 +657,14 @@ static void require_capi_sublib_ (lua_State *L, const char *name,
     lua_setfield(L, -3, #name);  /* insert sublib into capi */  \
     return 1;  /* return sublib */                              \
   }
+#else
+#define SUBLIB_OPEN(name)                                       \
+  int luaopen_capi_##name (lua_State *L) {                      \
+    require_capi_base(L);                                       \
+    luaL_register(L, LIBNAME "." #name, capi_##name##_lib);     \
+    return 1;  /* return sublib */                              \
+  }
+#endif
 
 SUBLIB_OPEN(strict)
 SUBLIB_OPEN(types)
