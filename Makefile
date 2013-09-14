@@ -13,7 +13,8 @@ endif
 
 RM ?= rm -f
 
-LUADIR ?= /usr/include
+V ?= 5.2
+LUADIR ?= /usr/local/include/lua$V
 
 COPT ?= -O2
 CVERSION ?= -ansi -pedantic
