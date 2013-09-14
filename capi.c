@@ -332,8 +332,13 @@ static int capiS_tofloat (lua_State *L) {
 
 
 static int capiS_tointeger (lua_State *L) {
+#if LUA_VERSION_NUM >= 503
+  if (lua_type(L, 1) == LUA_TNUMBER && lua_isinteger(L, 1))
+    lua_settop(L, 1);
+#else
   if (lua_type(L, 1) == LUA_TNUMBER)
     lua_pushinteger(L, lua_tointeger(L, 1));
+#endif
   else
     lua_pushnil(L);
   return 1;
@@ -341,7 +346,11 @@ static int capiS_tointeger (lua_State *L) {
 
 
 static int capiS_tounsigned (lua_State *L) {
+#if LUA_VERSION_NUM >= 503
+  if (lua_type(L, 1) == LUA_TNUMBER && lua_isinteger(L, 1))
+#else
   if (lua_type(L, 1) == LUA_TNUMBER)
+#endif
     lua_pushunsigned(L, lua_tounsigned(L, 1));
   else
     lua_pushnil(L);
