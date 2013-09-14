@@ -636,7 +636,7 @@ static int get_sublib (lua_State *L, const char *name) {
 
 static void require_capi_sublib_ (lua_State *L, const char *name,
                                   lua_CFunction openf) {
-  require_capi_base(L);
+  /* call with base lib on stack */
   if (!get_sublib(L, name)) {
     const char *dottedname = lua_pushfstring(L, "%s.%s", LIBNAME, name);
     luaL_requiref(L, dottedname, openf, 0);
