@@ -142,9 +142,7 @@ static int capi_tolightudata (lua_State *L) {
 
 
 static int capi_rawlen (lua_State *L) {
-  size_t l;
-  luaL_checkany(L, 1);
-  l = lua_rawlen(L, 1);
+  size_t l = (luaL_checkany(L, 1), lua_rawlen(L, 1));
   push_size(L, l);
   return 1;
 }
@@ -225,10 +223,8 @@ static int capi_isinteger (lua_State *L) {
   luaL_checkany(L, 1);
   lua_pushboolean(L, lua_isinteger(L, 1));
 #else
-  lua_Integer n;
   int isnum;
-  luaL_checkany(L, 1);
-  n = lua_tonumberx(L, 1, &isnum);
+  lua_Integer n = (luaL_checkany(L, 1), lua_tonumberx(L, 1, &isnum));
   lua_pushboolean(L, isnum && n == (lua_Integer)n);
 #endif
   return 1;
@@ -243,10 +239,8 @@ static int capi_isstring (lua_State *L) {
 
 
 static int capi_tointeger (lua_State *L) {
-  lua_Integer n;
   int isnum;
-  luaL_checkany(L, 1);
-  n = lua_tointegerx(L, 1, &isnum);
+  lua_Integer n = (luaL_checkany(L, 1), lua_tointegerx(L, 1, &isnum));
   if (isnum)
     lua_pushinteger(L, n);
   else
@@ -257,10 +251,8 @@ static int capi_tointeger (lua_State *L) {
 
 #if LUA_VERSION_NUM >= 502
 static int capi_tounsigned (lua_State *L) {
-  lua_Unsigned n;
   int isnum;
-  luaL_checkany(L, 1);
-  n = lua_tounsignedx(L, 1, &isnum);
+  lua_Unsigned n = (luaL_checkany(L, 1), lua_tounsignedx(L, 1, &isnum));
   if (isnum)
     lua_pushunsigned(L, n);
   else
@@ -429,18 +421,21 @@ static int capi_endianness (lua_State *L) {
 
 
 static int capiS_isstring (lua_State *L) {
+  luaL_checkany(L, 1);
   lua_pushboolean(L, lua_type(L, 1) == LUA_TSTRING);
   return 1;
 }
 
 
 static int capiS_isnumber (lua_State *L) {
+  luaL_checkany(L, 1);
   lua_pushboolean(L, lua_type(L, 1) == LUA_TNUMBER);
   return 1;
 }
 
 
 static int capiS_tostring (lua_State *L) {
+  luaL_checkany(L, 1);
   if (lua_type(L, 1) == LUA_TSTRING)
     lua_settop(L, 1);
   else
@@ -450,20 +445,21 @@ static int capiS_tostring (lua_State *L) {
 
 
 static int capiS_tolstring (lua_State *L) {
-  size_t l;
-  const char *s;
-  if (lua_type(L, 1) != LUA_TSTRING) {
-    lua_pushnil(L);
-    return 1;
+  luaL_checkany(L, 1);
+  if (lua_type(L, 1) == LUA_TSTRING) {
+    size_t l;
+    const char *s = lua_tolstring(L, 1, &l);
+    lua_pushlstring(L, s, l);
+    push_size(L, l);
+    return 2;
   }
-  s = lua_tolstring(L, 1, &l);
-  lua_pushlstring(L, s, l);
-  push_size(L, l);
-  return 2;
+  lua_pushnil(L);
+  return 1;
 }
 
 
 static int capiS_tonumber (lua_State *L) {
+  luaL_checkany(L, 1);
   if (lua_type(L, 1) == LUA_TNUMBER)
     lua_settop(L, 1);
   else
@@ -474,6 +470,7 @@ static int capiS_tonumber (lua_State *L) {
 
 #if LUA_VERSION_NUM >= 503
 static int capiS_tofloat (lua_State *L) {
+  luaL_checkany(L, 1);
   if (lua_type(L, 1) == LUA_TNUMBER && !lua_isinteger(L, 1))
     lua_settop(L, 1);
   else
@@ -484,6 +481,7 @@ static int capiS_tofloat (lua_State *L) {
 
 
 static int capiS_tointeger (lua_State *L) {
+  luaL_checkany(L, 1);
 #if LUA_VERSION_NUM >= 503
   if (lua_type(L, 1) == LUA_TNUMBER && lua_isinteger(L, 1))
     lua_settop(L, 1);
@@ -499,6 +497,7 @@ static int capiS_tointeger (lua_State *L) {
 
 #if LUA_VERSION_NUM >= 502
 static int capiS_tounsigned (lua_State *L) {
+  luaL_checkany(L, 1);
 #if LUA_VERSION_NUM >= 503
   if (lua_type(L, 1) == LUA_TNUMBER && lua_isinteger(L, 1))
 #else
