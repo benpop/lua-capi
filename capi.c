@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "lua.h"
 #include "lauxlib.h"
 
@@ -339,6 +341,85 @@ static int capi_newproxy (lua_State *L) {
 }
 
 
+/*
+** Inspection utilites.
+*/
+
+
+static int capi_string2udata (lua_State *L) {
+  size_t l;
+  const char *s = luaL_checklstring(L, 1, &l);
+  void *ud = lua_newuserdata(L, l);
+  memcpy(ud, s, l);
+  return 1;
+}
+
+
+static int capi_udata2string (lua_State *L) {
+  void *ud = (luaL_checktype(L, 1, LUA_TUSERDATA), lua_touserdata(L, 1));
+  size_t l = lua_rawlen(L, 1);
+  lua_pushlstring(L, (const char *)ud, l);
+  return 1;
+}
+
+
+static int capi_hexstring (lua_State *L) {
+  luaL_Buffer b;
+  size_t i;
+  size_t l;
+  const char *s = luaL_checklstring(L, 1, &l);
+  lua_settop(L, 1);
+  luaL_buffinitsize(L, &b, l * 2);
+  for (i = 0; i < l; i++) {
+    char sbyte[4];
+    sprintf(sbyte, "%02x", (int)(unsigned char)s[i]);
+    luaL_addlstring(&b, sbyte, 2);
+  }
+  luaL_pushresult(&b);
+  return 1;
+}
+
+
+static int capi_hexbytes (lua_State *L) {
+  luaL_Buffer b;
+  int i;
+  int n = lua_gettop(L);
+  if (n == 0)
+    return luaL_error(L, "no bytes given");
+  luaL_buffinitsize(L, &b, n * 2);
+  for (i = 1; i <= n; i++) {
+    char sbyte[4];
+    int ibyte = luaL_checkint(L, i);
+    if (ibyte < 0 || ibyte > 0xff)
+      return luaL_argerror(L, i,
+          lua_pushfstring(L, "invalid byte value: %d", ibyte));
+    sprintf(sbyte, "%02x", ibyte);
+    luaL_addlstring(&b, sbyte, 2);
+  }
+  luaL_pushresult(&b);
+  return 1;
+}
+
+
+static int littleendian (void) {
+  long endian_test = 1;  /* most long likely larger than char */
+  /* If first byte is 1: little-endian.  Else assume big-endian.  */
+  return (int)((char *)&endian_test)[0];
+}
+
+
+static int capi_littleendian (lua_State *L) {
+  lua_pushboolean(L, littleendian());
+  return 1;
+}
+
+
+static int capi_endianness (lua_State *L) {
+  lua_pushstring(L, littleendian() ? "little-endian" : "big-endian");
+  return 1;
+}
+
+
 /*}=================================================================*/
 
 
@@ -559,6 +640,12 @@ static const luaL_Reg capi_lib[] = {
   {"toboolean", capi_toboolean},
   {"createtable", capi_createtable},
   {"concat", capi_concat},
+  {"string2udata", capi_string2udata},
+  {"udata2string", capi_udata2string},
+  {"hexstring", capi_hexstring},
+  {"hexbytes", capi_hexbytes},
+  {"littleendian", capi_littleendian},
+  {"endianness", capi_endianness},
   {NULL, NULL}
 };
 
