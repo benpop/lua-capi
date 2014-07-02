@@ -19,7 +19,8 @@
 typedef lua_Unsigned Uint64;
 #elif defined(_MSC_VER) || defined(__BORLANDC__)
 typedef unsigned __int64 Uint64;
-#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#elif (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) \
+    || defined(HAVE_STDINT_H)
 #include <stdint.h>
 typedef uint64_t Uint64;
 #else
