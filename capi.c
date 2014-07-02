@@ -9,6 +9,12 @@
 
 #ifndef MAX_INTEGER /* { */
 
+/*
+** When compiled with -ansi (default), on many systems uint64
+** uses "unsigned long long" and thus will raise warnings about
+** types not specified in standard C89.
+*/
+
 #if defined(LUA_INTSIZE) && LUA_INTSIZE >= 3
 typedef lua_Unsigned Uint64;
 #elif defined(_MSC_VER) || defined(__BORLANDC__)
