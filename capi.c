@@ -9,6 +9,10 @@
 
 #ifndef MAX_INTEGER /* { */
 
+#ifdef LUA_MAXINTEGER /* { */
+#define MAX_INTEGER LUA_MAXINTEGER
+#else
+
 /*
 ** When compiled with -ansi (default), on many systems uint64
 ** uses "unsigned long long" and thus will raise warnings about
@@ -29,6 +33,7 @@ typedef unsigned long long Uint64;
 
 #define MAX_INTEGER ((lua_Integer)(~(Uint64)0 >> 1))
 
+#endif /* } */
 #endif /* } */
 
 
