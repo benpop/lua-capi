@@ -114,6 +114,12 @@ static void luaL_requiref (lua_State *L, const char *modname,
 #endif /* } */
 
 
+#if LUA_VERSION_NUM == 502 || \
+  (LUA_VERSION_NUM == 503 && defined(LUA_COMPAT_APIINTCASTS))
+#define USE_LUA_UNSIGNED_OPS
+#endif
+
+
 /*{=================================================================
 ** main library
 **==================================================================*/
@@ -261,7 +267,7 @@ static int capi_tointeger (lua_State *L) {
 }
 
 
-#if LUA_VERSION_NUM >= 502
+#ifdef USE_LUA_UNSIGNED_OPS
 static int capi_tounsigned (lua_State *L) {
   int isnum;
   lua_Unsigned n = (luaL_checkany(L, 1), lua_tounsignedx(L, 1, &isnum));
@@ -507,11 +513,11 @@ static int capiS_tointeger (lua_State *L) {
 }
 
 
-#if LUA_VERSION_NUM >= 502
+#ifdef USE_LUA_UNSIGNED_OPS
 static int capiS_tounsigned (lua_State *L) {
   luaL_checkany(L, 1);
-#if LUA_VERSION_NUM >= 503
-  if (lua_type(L, 1) == LUA_TNUMBER && lua_isinteger(L, 1))
+#if LUA_VERSION_NUM == 503
+  if (lua_isinteger(L, 1))
 #else
   if (lua_type(L, 1) == LUA_TNUMBER)
 #endif
@@ -632,7 +638,7 @@ static const luaL_Reg capi_lib[] = {
   {"typename", capi_typename},
   {"isnumber", capi_isnumber},
   {"tointeger", capi_tointeger},
-#if LUA_VERSION_NUM >= 502
+#ifdef USE_LUA_UNSIGNED_OPS
   {"tounsigned", capi_tounsigned},
 #endif
   {"isinteger", capi_isinteger},
@@ -669,7 +675,7 @@ static const luaL_Reg capi_strict_lib[] = {
   {"tofloat", capiS_tofloat},
 #endif
   {"tointeger", capiS_tointeger},
-#if LUA_VERSION_NUM >= 502
+#ifdef USE_LUA_UNSIGNED_OPS
   {"tounsigned", capiS_tounsigned},
 #endif
   {"tostring", capiS_tostring},
