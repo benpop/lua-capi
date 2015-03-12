@@ -311,8 +311,8 @@ static int capi_toboolean (lua_State *L) {
 
 
 static int capi_createtable (lua_State *L) {
-  int narr = luaL_checkint(L, 1);
-  int nrec = luaL_checkint(L, 2);
+  int narr = luaL_checkinteger(L, 1);
+  int nrec = luaL_checkinteger(L, 2);
   lua_createtable(L, narr, nrec);
   return 1;
 }
@@ -399,7 +399,7 @@ static int capi_hexbytes (lua_State *L) {
   luaL_buffinitsize(L, &b, n * 2);
   for (i = 1; i <= n; i++) {
     char sbyte[4];
-    int ibyte = luaL_checkint(L, i);
+    int ibyte = luaL_checkinteger(L, i);
     if (ibyte < 0 || ibyte > 0xff)
       return luaL_argerror(L, i,
           lua_pushfstring(L, "invalid byte value: %d", ibyte));
@@ -573,7 +573,7 @@ static int capiT_tag (lua_State *L) {
 
 
 static int Tnext (lua_State *L) {
-  int tt = luaL_checkint(L, 2) + 1;
+  int tt = luaL_checkinteger(L, 2) + 1;
   lua_pushinteger(L, tt);
   if (MIN_TYPETAG <= tt && tt <= MAX_TYPETAG)
     lua_pushstring(L, Ttypenames[tt+1]);
@@ -598,7 +598,7 @@ static int capi_type (lua_State *L) {
 
 
 static int capi_typename (lua_State *L) {
-  int tt = luaL_checkint(L, 1);
+  int tt = luaL_checkinteger(L, 1);
   if (MIN_TYPETAG <= tt && tt <= MAX_TYPETAG) {
     lua_pushstring(L, lua_typename(L, tt));
     return 1;
